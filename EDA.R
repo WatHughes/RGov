@@ -106,5 +106,13 @@ InCommon
 # 191:           q34 annual household income                                  q28 2nd FALSE
 # 192:                            q35 gender                                  q28 3rd FALSE
 # 193:                            location 1                                  q28 4th FALSE
+names(Survey2012) = tolower(names(Survey2012))
 qid2012 = sub(' .*','',names(Survey2012))
+x = table(qid2012)
+quid2012Unique = names(x)[x==1]
+names(Survey2014) = tolower(names(Survey2014))
 qid2014 = sub(' .*','',names(Survey2014))
+y = table(qid2014)
+quid2014Unique = names(y)[y==1]
+MatchNames = intersect(quid2012Unique,quid2014Unique)
+
