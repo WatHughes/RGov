@@ -106,6 +106,11 @@ InCommon
 # 191:           q34 annual household income                                  q28 2nd FALSE
 # 192:                            q35 gender                                  q28 3rd FALSE
 # 193:                            location 1                                  q28 4th FALSE
+# That isn't useful. So match on the first token. Note I could match more by matching the first
+# 2 tokens but many of those matches are not meaningful, e.g., 2nd choice, 3rd choice, etc. don't
+# necessarily match even if the QIDs match. So, match on unique first tokens. Must samecase to
+# get a useful number of matches. One more complexity for the record: mixed use of space and dash
+# as a token seperator.
 names(Survey2012) = tolower(names(Survey2012))
 qid2012 = sub(' .*','',names(Survey2012))
 x = table(qid2012)
@@ -115,4 +120,12 @@ qid2014 = sub(' .*','',names(Survey2014))
 y = table(qid2014)
 quid2014Unique = names(y)[y==1]
 MatchNames = intersect(quid2012Unique,quid2014Unique)
-
+MatchNames = as.data.table(MatchNames)
+qid2012 = data.table(ColNum=1:length(qid2012),qid2012=qid2012)
+qid2014 = data.table(ColNum=1:length(qid2014),qid2014=qid2014)
+Cols2012 = qid2012[MatchNames,on=c(qid2012='MatchNames')]
+Cols2014 = qid2014[MatchNames,on=c(qid2014='MatchNames')]
+setkey(Cols2012,ColNum)
+setkey(Cols2014,ColNum)
+QuestionNames=data.frame(Survey2012=substr(names(Survey2012)[Cols2012$ColNum]
+names(Survey2014)[Cols2014$ColNum]
