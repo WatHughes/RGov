@@ -127,5 +127,16 @@ Cols2012 = qid2012[MatchNames,on=c(qid2012='MatchNames')]
 Cols2014 = qid2014[MatchNames,on=c(qid2014='MatchNames')]
 setkey(Cols2012,ColNum)
 setkey(Cols2014,ColNum)
-QuestionNames=data.frame(Survey2012=substr(names(Survey2012)[Cols2012$ColNum]
-names(Survey2014)[Cols2014$ColNum]
+QuestionNames=data.table(Survey2012=names(Survey2012)[Cols2012$ColNum]
+                         ,Survey2014=names(Survey2014)[Cols2014$ColNum]
+                         ,InitialTokenLength=nchar(Cols2012$qid2012)+2
+)
+QuestionNames$Survey2012 = substr(QuestionNames$Survey2012
+                                  ,grepl('^q',QuestionNames$Survey2012)*QuestionNames$InitialTokenLength
+                                  ,99999)
+QuestionNames$Survey2014 = substr(QuestionNames$Survey2014
+                                  ,grepl('^q',QuestionNames$Survey2014)*QuestionNames$InitialTokenLength
+                                  ,99999)
+
+
+
