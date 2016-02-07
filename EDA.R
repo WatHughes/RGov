@@ -1,4 +1,10 @@
 require(data.table)
+# install.packages('rMaps')
+# require(devtools)
+# install_github('ramnathv/rCharts@dev')
+require(rCharts)
+# install_github('ramnathv/rMaps')
+require(rMaps)
 
 DataDir = '../Data/RGov'
 dir();dir(DataDir)
@@ -138,5 +144,39 @@ QuestionNames$Survey2014 = substr(QuestionNames$Survey2014
                                   ,grepl('^q',QuestionNames$Survey2014)*QuestionNames$InitialTokenLength
                                   ,99999)
 
+# Mapping
+min(Survey2012$`Location 1`[Survey2012$`Location 1`!=''])
+max(Survey2012$`Location 1`)
+min(Survey2014$`Location 1`[Survey2014$`Location 1`!=''&Survey2014$`Location 1`!='(0, 0)'])
+max(Survey2014$`Location 1`)
+Survey2012[`Location 1`==''] # 5 of these
+Survey2014[`Location 1`==''|`Location 1`=='(0, 0)'] # 4 and 7 of each, respectively
 
+invisible(Survey2012[,Lat:=as.numeric(sapply(regmatches(Survey2012$`Location 1`,
+                                                        regexec('[+-]?[0-9]+',Survey2012$`Location 1`))
+       ,function(x) if(length(x)==0) '0' else x))/1000000])
+boxplot(Survey2012[Lat!=0,Lat])
+invisible(Survey2014[,Lat:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
+                                                        regexec('[+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
+       ,function(x) if(length(x)==0) '0' else x))])
+boxplot(list(Lat2012=Survey2012[Lat!=0,Lat],Lat2014=Survey2014[Lat!=0,Lat]))
+invisible(Survey2012[,Long:=as.numeric(sapply(regmatches(Survey2012$`Location 1`,
+                                                        regexec(' [+-]?[0-9]+',Survey2012$`Location 1`))
+       ,function(x) if(length(x)==0) '0' else x))/1000000])
+boxplot(Survey2012[Long!=0,Long])
+invisible(Survey2014[,Long:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
+                                                        regexec(' [+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
+       ,function(x) if(length(x)==0) '0' else x))])
+boxplot(list(Long2012=Survey2012[Long!=0,Long],Long2014=Survey2014[Long!=0,Long]))
 
+DataCenterLat = max(c(Survey2012[Lat!=0,Lat],Survey2014[Lat!=0,Lat]))+
+    min(c(Survey2012[Lat!=0,Lat],Survey2014[Lat!=0,Lat]))
+DataCenterLat = DataCenterLat / 2
+DataCenterLong = max(c(Survey2012[Long!=0,Long],Survey2014[Long!=0,Long]))+
+    min(c(Survey2012[Long!=0,Long],Survey2014[Long!=0,Long]))
+DataCenterLong = DataCenterLong / 2
+http://rmaps.github.io/blog/posts/leaflet-heat-maps/index.html
+L2 <- Leaflet$new()
+L2$setView(c(DataCenterLat, DataCenterLong),11)
+L2$tileLayer(provider = 'MapQuestOpen.OSM')
+L2
