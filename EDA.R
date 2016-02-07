@@ -175,8 +175,66 @@ DataCenterLat = DataCenterLat / 2
 DataCenterLong = max(c(Survey2012[Long!=0,Long],Survey2014[Long!=0,Long]))+
     min(c(Survey2012[Long!=0,Long],Survey2014[Long!=0,Long]))
 DataCenterLong = DataCenterLong / 2
-http://rmaps.github.io/blog/posts/leaflet-heat-maps/index.html
+# From http://rmaps.github.io/blog/posts/leaflet-heat-maps/index.html
 L2 <- Leaflet$new()
-L2$setView(c(DataCenterLat, DataCenterLong),11)
-L2$tileLayer(provider = 'MapQuestOpen.OSM')
+L2$setView(c(DataCenterLat, DataCenterLong),15)
+# L2$tileLayer(provider = 'MapQuestOpen.OSM')
+L2$tileLayer(provider = 'Stamen.Watercolor')
+L2
+
+# install.packages('ggmap') # Timeout to come to grips w/the utility functions used.
+data(crime, package = 'ggmap')
+require(plyr)
+crime_dat = ddply(crime, .(lat, lon), summarise, count = length(address))
+crime_datJ = toJSONArray2(na.omit(crime_dat), json = F, names = F)
+str(crime_datJ)
+# List of 24251
+#  $ :List of 3
+#   ..$ : num 27.5
+#   ..$ : num -99.5
+#   ..$ : int 1
+#   ..- attr(*, "na.action")=Class 'omit'  Named int 24252
+#   .. .. ..- attr(*, "names")= chr "24252"
+#  $ :List of 3
+#   ..$ : num 29.5
+#   ..$ : num -95.1
+#   ..$ : int 10
+#   ..- attr(*, "na.action")=Class 'omit'  Named int 24252
+#   .. .. ..- attr(*, "names")= chr "24252"
+# ....................
+cat(rjson::toJSON(crime_datJ[1:2]))
+# [[27.5071143,-99.5055471,1],[29.4836146,-95.0618715,10]]
+cat(rjson::toJSON(crime_dat[1:2,]))
+# {"lat":[27.5071143,29.4836146],"lon":[-99.5055471,-95.0618715],"count":[1,10]}
+cd = as.matrix(crime_dat)
+dimnames(cd) = NULL
+cat(rjson::toJSON(cd[1:2,]))
+# [27.5071143,29.4836146,-99.5055471,-95.0618715,1,10]
+cdj = toJSONArray2(na.omit(crime_dat), json = T, names = F)
+# chr "[\n [\n 27.507,\n-99.506,\n1 \n],\n[\n 29.484,\n-95.062,\n10 \n],\n[\n 29.522,\n-95.058,\n5 \n],\n[\n 29.522,\n-95.058,\n8 \n],"| __truncated__
+
+
+Jdata2012 = data.frame(Lat=Survey2012[Lat!=0&Long!=0,Lat],Lon=Survey2012[Lat!=0&Long!=0,Long])
+Jdata2012$hmVal = runif(nrow(Jdata2012),1,5)
+Jdata2012 = toJSONArray2(na.omit(Jdata2012), json = F, names = F)
+J2012 = rjson::toJSON(Jdata2012)
+nchar(J2012)
+# [1] 54206
+cat(rjson::toJSON(Jdata2012[1:2]))
+# [[37.587246,-77.445636,1.71286322455853],[37.511538,-77.445405,3.13835659809411]]
+
+
+L2$addAssets(jshead = c(
+  'http://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js'
+))
+
+# Add javascript to modify underlying chart
+L2$setTemplate(afterScript = sprintf('
+<script>
+  var addressPoints = %s
+  var heat = L.heatLayer(addressPoints).addTo(map)
+</script>
+', J2012
+))
+
 L2
