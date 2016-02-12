@@ -5,6 +5,7 @@ require(data.table)
 require(rCharts)
 # install_github('ramnathv/rMaps')
 require(rMaps)
+# install.packages('leaflet')
 
 DataDir = '../Data/RGov'
 dir();dir(DataDir)

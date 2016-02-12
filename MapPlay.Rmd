@@ -5,10 +5,11 @@ date: "February 7, 2016"
 output: html_document
 mode: selfcontained
 ---
+This makes a valid HTML page. It works in a browser. But it crashes R's builtin browser.
 
 Example:
 
-```{r rcht, message=FALSE, echo=FALSE, results='asis', comment = NA}
+```{r rcht, message=F, echo=F}
 require(knitr)
 require(rCharts)
 require(rMaps)
@@ -17,16 +18,16 @@ DataCenterLat = 37.5287955
 DataCenterLong = -77.493477
 load('J2012.rda')
 
-L2 <- Leaflet$new()
+L2 = Leaflet$new()
 L2$setView(c(DataCenterLat, DataCenterLong),15)
 # L2$tileLayer(provider = 'MapQuestOpen.OSM')
 L2$tileLayer(provider = 'Stamen.Watercolor')
 
-L2$addAssets(jshead = c(
-  'http://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js'
-))
+# L2$addAssets(jshead = c('http://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js'))
 
 # Add javascript to modify underlying chart
+if (F)
+{
 L2$setTemplate(afterScript = sprintf('
 <script>
   var addressPoints = %s
@@ -34,11 +35,18 @@ L2$setTemplate(afterScript = sprintf('
 </script>
 ', J2012
 ))
-
-getwd()
-
-# L2$print('chart',include_assets=T)
-L2$show('inline', include_assets=T, cdn=F)
+}
+# getwd()
 ```
 
-N
+```{r L2, echo = F, results='asis'}
+#L2$print('chart',include_assets=T)
+#L2$show('inline', include_assets=T, cdn=F)
+L2$save('L2.html',cdn=T)
+cat('<iframe src="L2.html" width=100%, height=600></iframe>')
+```
+
+The points are from the 2012 survey. ATM, the values (colors) are made up. Reaction?
+
+mailto:wat@creativedata.com
+
