@@ -1,28 +1,36 @@
-library(shiny)
-library(leaflet)
+require(shiny)
+require(leaflet)
 
-r_colors <- rgb(t(col2rgb(colors()) / 255))
-names(r_colors) <- colors()
+DataCenterLat = 37.5287955
+DataCenterLong = -77.493477
 
-ui <- fluidPage(
-  leafletOutput("mymap"),
-  p(),
-  actionButton("recalc", "New points")
-)
+# rColors = rgb(t(col2rgb(colors()) / 255))
+# names(r_colors) <- colors()
 
-server <- function(input, output, session) {
+ui = fluidPage(
+    leafletOutput('mymap'),
+    p(),
+    actionButton('recalc', 'New points')
+) # fluidPage
 
-  points <- eventReactive(input$recalc, {
-    cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
-  }, ignoreNULL = FALSE)
+server = function(input, output, session){
+    points = eventReactive(
+        input$recalc
+        ,{
+            cbind(rnorm(40) / 10 * 2 + DataCenterLong, rnorm(40) / 20 + DataCenterLat)
+        }
+        ,ignoreNULL=F)
 
-  output$mymap <- renderLeaflet({
-    leaflet() %>%
-      addProviderTiles("Stamen.TonerLite",
-        options = providerTileOptions(noWrap = TRUE)
-      ) %>%
-      addMarkers(data = points())
-  })
-}
+    output$mymap = renderLeaflet({
+        leaflet() %>%
+            addProviderTiles(
+#                'Stamen.TonerLite'
+#                'OpenStreetMap.BlackAndWhite'
+                'MapQuestOpen.OSM'
+                ,options=providerTileOptions(noWrap=T)
+        ) %>%
+            addMarkers(data=points())
+    })
+} # server
 
 shinyApp(ui, server)
