@@ -133,7 +133,7 @@ MP1TabUI = function(){
             leafletOutput('mymap1',width = 800, height = 800)
         )
         ,sidebarPanel(
-            selectInput('MapC1', 'Choose a map:', choices = MapProviders)
+            selectInput('MapC1', 'Choose a map source:', choices = MapProviders, selected='MapQuestOpen.OSM')
         )
     ) # tabPanel - Map Play 1
 } # MP1TabUI
@@ -172,7 +172,8 @@ RD2TabServer = function(input, output, session){
     output$mymap2 = renderLeaflet({
         leaflet() %>%
             addProviderTiles(
-                'OpenStreetMap.BlackAndWhite'
+                input$MapC1
+#                'OpenStreetMap.BlackAndWhite'
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
                 addMarkers(data=points2())
