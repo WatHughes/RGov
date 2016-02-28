@@ -129,10 +129,12 @@ DocTabUI = function(){
 MP1TabUI = function(){
     tabPanel(
         'Map Play',value='MapPlay1'
-        ,br()
-        ,leafletOutput('mymap1',width = 800, height = 800)
-        ,br()
-        ,selectInput('MapC1', 'Choose a map:', choices = MapProviders)
+        ,mainPanel(
+            leafletOutput('mymap1',width = 800, height = 800)
+        )
+        ,sidebarPanel(
+            selectInput('MapC1', 'Choose a map:', choices = MapProviders)
+        )
     ) # tabPanel - Map Play 1
 } # MP1TabUI
 
