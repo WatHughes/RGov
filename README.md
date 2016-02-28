@@ -11,8 +11,9 @@ I put these two thoughts together so I plan to make a new habit. When it is time
 
 In that spirit, I am starting with data from Richmond, VA, which is the nearest city to my home. They have made available citizen satisfaction data from 2012 and 2014. The data is geo coded, which is great because I need to be more facile with [Leaflet](http://leafletjs.com/) and [Leaflet for R](https://rstudio.github.io/leaflet/). Leaflet is the leading open-source JavaScript library for mobile-friendly interactive maps.
 
+## Data Soucres
 
-Data downloaded Saturday January 30, 2016
+Downloaded Saturday January 30, 2016
 
 From https://data.richmondgov.com/Well-Managed-Government/RVA-Community-Survey-2014-Data-GEO/2imz-upgs
 
