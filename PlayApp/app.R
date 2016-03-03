@@ -1,7 +1,7 @@
 require(shiny)
 require(leaflet)
 
-NumPoints = 100
+NumPoints = 1000
 DataCenterLat = 37.5287955
 DataCenterLong = -77.493477
 
@@ -145,7 +145,7 @@ MP1TabServer = function(input, output, session){
                 input$MapC1
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
-                addMarkers(data=cbind(DataCenterLong,DataCenterLat))
+                addMarkers(DataCenterLong,DataCenterLat)
     })
 } # MP1TabServer
 
@@ -180,7 +180,7 @@ RD2TabServer = function(input, output, session){
     })
 } # RD2TabServer
 
-ui = fluidPage(
+ui = fluidPage( # Todo, consider navbarPage with a bootstrap theme.
     tabsetPanel
     (
         type='tabs',id='tabs'
