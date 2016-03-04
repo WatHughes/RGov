@@ -60,7 +60,7 @@ Survey2014 = fread(paste0(DataDir,'/','RVA_Community_Survey_2014_Data_GEO.csv'))
 # logical, integer or numeric back to character which may not be lossless; e.g.,
 # if '00' and '000' occurred bef
 str(Survey2014,list.len=300)
-Classes ‘data.table’ and 'data.frame':	1418 obs. of  210 variables:
+# Classes ‘data.table’ and 'data.frame':	1418 obs. of  210 variables:
 #  $ Survey ID Number                        : int  1 3 4 6 7 10 11 12 13 14 ...
 #  $ Q1a Quality of life in the City         : int  4 1 4 4 4 5 4 3 9 4 ...
 #  $ Q1b Quality of public schools           : int  9 1 3 2 2 9 1 1 1 1 ...
@@ -146,27 +146,27 @@ QuestionNames$Survey2014 = substr(QuestionNames$Survey2014
                                   ,99999)
 
 # Mapping
-min(Survey2012$`Location 1`[Survey2012$`Location 1`!=''])
-max(Survey2012$`Location 1`)
-min(Survey2014$`Location 1`[Survey2014$`Location 1`!=''&Survey2014$`Location 1`!='(0, 0)'])
-max(Survey2014$`Location 1`)
-Survey2012[`Location 1`==''] # 5 of these
-Survey2014[`Location 1`==''|`Location 1`=='(0, 0)'] # 4 and 7 of each, respectively
+min(Survey2012$`location 1`[Survey2012$`location 1`!=''])
+max(Survey2012$`location 1`)
+min(Survey2014$`location 1`[Survey2014$`location 1`!=''&Survey2014$`location 1`!='(0, 0)'])
+max(Survey2014$`location 1`)
+Survey2012[`location 1`==''] # 5 of these
+Survey2014[`location 1`==''|`location 1`=='(0, 0)'] # 4 and 7 of each, respectively
 
-invisible(Survey2012[,Lat:=as.numeric(sapply(regmatches(Survey2012$`Location 1`,
-                                                        regexec('[+-]?[0-9]+',Survey2012$`Location 1`))
+invisible(Survey2012[,Lat:=as.numeric(sapply(regmatches(Survey2012$`location 1`,
+                                                        regexec('[+-]?[0-9]+',Survey2012$`location 1`))
        ,function(x) if(length(x)==0) '0' else x))/1000000])
 boxplot(Survey2012[Lat!=0,Lat])
-invisible(Survey2014[,Lat:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
-                                                        regexec('[+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
+invisible(Survey2014[,Lat:=as.numeric(sapply(regmatches(Survey2014$`location 1`,
+                                                        regexec('[+-]?[0-9]+\\.[0-9]+',Survey2014$`location 1`))
        ,function(x) if(length(x)==0) '0' else x))])
 boxplot(list(Lat2012=Survey2012[Lat!=0,Lat],Lat2014=Survey2014[Lat!=0,Lat]))
-invisible(Survey2012[,Long:=as.numeric(sapply(regmatches(Survey2012$`Location 1`,
-                                                        regexec(' [+-]?[0-9]+',Survey2012$`Location 1`))
+invisible(Survey2012[,Long:=as.numeric(sapply(regmatches(Survey2012$`location 1`,
+                                                        regexec(' [+-]?[0-9]+',Survey2012$`location 1`))
        ,function(x) if(length(x)==0) '0' else x))/1000000])
 boxplot(Survey2012[Long!=0,Long])
-invisible(Survey2014[,Long:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
-                                                        regexec(' [+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
+invisible(Survey2014[,Long:=as.numeric(sapply(regmatches(Survey2014$`location 1`,
+                                                        regexec(' [+-]?[0-9]+\\.[0-9]+',Survey2014$`location 1`))
        ,function(x) if(length(x)==0) '0' else x))])
 boxplot(list(Long2012=Survey2012[Long!=0,Long],Long2014=Survey2014[Long!=0,Long]))
 
@@ -179,8 +179,8 @@ DataCenterLong = DataCenterLong / 2
 # From http://rmaps.github.io/blog/posts/leaflet-heat-maps/index.html
 L2 <- Leaflet$new()
 L2$setView(c(DataCenterLat, DataCenterLong),15)
-# L2$tileLayer(provider = 'MapQuestOpen.OSM')
-L2$tileLayer(provider = 'Stamen.Watercolor')
+L2$tileLayer(provider = 'MapQuestOpen.OSM')
+# L2$tileLayer(provider = 'Stamen.Watercolor')
 L2
 
 # install.packages('ggmap') # Timeout to come to grips w/the utility functions used.
