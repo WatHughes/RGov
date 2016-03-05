@@ -11,7 +11,8 @@ DataCenterLong = -77.493477
 # This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js
 # Forked from https://github.com/leaflet-extras/leaflet-providers, which was also copied here.
 
-MapProviders = c('OpenStreetMap.Mapnik'
+MapProviders = c(
+    'OpenStreetMap.Mapnik'
     ,'OpenStreetMap.BlackAndWhite'
     ,'OpenStreetMap.DE'
 #     ,'OpenStreetMap.France' # Appears blank for Richmond
@@ -113,9 +114,24 @@ MapProviders = c('OpenStreetMap.Mapnik'
 #    ,'NASAGIBS.ModisTerraAOD' # Appears blank
 #    ,'NASAGIBS.ModisTerraChlorophyll' # Appears blank
 #    ,'NLS' # Appears blank
-)
+) # MapProviders
 
-DocTabUI = function(){
+MarkerChoices = data.frame(stringsAsFactors=F
+    ,Choice=c('Default Icon','Green Circles','Dark Orchid 3 Circles','Sienna 2 Circles')
+    ,Type=c('I','C','C','C')
+    ,Color=c('','green','darkorchid3','sienna2')
+) # MarkerChoices
+
+# To make it easy to add tabs, remove tabs, and maintain tabs, the code implements each tab's
+# portion of ui and server in its own functions. By convention, the function names
+# start with some descriptive text but also will include a tab number. That number
+# will be used in the names of all controls on that tab to make sure there are no
+# accidents where a control name is used more than once. (Such controls are difficult
+# to work with.)
+# In this application the rightmost tab number is 1 and the numbers increase from there.
+# The doc tab is 99 and comes first.
+
+Doc99TabUI = function(){
     tabPanel(
         'Documentation',value='Doc'
         ,titlePanel('Doc')
@@ -124,69 +140,77 @@ DocTabUI = function(){
         ,'This application '
         ,br(),br()
     ) # tabPanel - Documentation
-} # DocTabUI
+} # Doc99TabUI
 
-MP1TabUI = function(){
+Map2TabUI = function(){
     tabPanel(
-        'Map Play',value='MapPlay1'
+        'Choose Map Source',value='Map2'
         ,mainPanel(
-            leafletOutput('mymap1',width = 800, height = 800)
+            leafletOutput('mymap2',width=800,height=800)
         )
         ,sidebarPanel(
-            selectInput('MapC1', 'Choose a map source:', choices = MapProviders, selected='MapQuestOpen.OSM')
+            selectInput('MapC2','Choose a map source:',choices=MapProviders, selected='MapQuestOpen.OSM')
         )
     ) # tabPanel - Map Play 1
-} # MP1TabUI
+} # Map2TabUI
 
-MP1TabServer = function(input, output, session){
-    output$mymap1 = renderLeaflet({
+Map2TabServer = function(input, output, session){
+    output$mymap2 = renderLeaflet({
         leaflet() %>%
             addProviderTiles(
-                input$MapC1
+                input$MapC2
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
                 addMarkers(DataCenterLong,DataCenterLat)
     })
-} # MP1TabServer
+} # Map2TabServer
 
-RD2TabUI = function()
+Marker1TabUI = function()
 {
-    tabPanel(
-        'Random Data 2',value='Random2'
-        ,br()
-        ,leafletOutput('mymap2',width = 800, height = 800)
-        ,p()
-        ,actionButton('recalc2', 'New points')
-    ) # tabPanel - Random 2
-} # RD2TabUI
+    ChoiceList=list() # selectInput will display the name if each element but return its value, which is the row number of MarkerChoices
+    for(i in 1:nrow(MarkerChoices)){
+        ChoiceList[[i]] = i
+    }
+    names(ChoiceList) = MarkerChoices$Choice
 
-RD2TabServer = function(input, output, session){
-    points2 = eventReactive(
-        input$recalc2
+    tabPanel(
+        'Choose Marker Style',value='Marker1'
+        ,mainPanel(
+            leafletOutput('mymap1',width=800,height=800)
+        )
+        ,sidebarPanel(
+            selectInput('MapM1', 'Choose a map marker style:', choices = ChoiceList, selected=1)
+            ,actionButton('NP1', 'New points')
+        )
+    ) # tabPanel - Marker1
+} # Marker1TabUI
+
+Marker1TabServer = function(input, output, session){
+    points1 = eventReactive(
+        input$NP1
         ,{
             cbind(rnorm(NumPoints) / 10 + DataCenterLong, rnorm(NumPoints) / 20 + DataCenterLat)
         }
         ,ignoreNULL=F
     )
 
-    output$mymap2 = renderLeaflet({
+    output$mymap1 = renderLeaflet({
         leaflet() %>%
             addProviderTiles(
-                input$MapC1
-#                'OpenStreetMap.BlackAndWhite'
+                input$MapC2
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
-                addMarkers(data=points2())
+                addMarkers(data=points1())
     })
-} # RD2TabServer
+} # Marker1TabServer
 
 ui = fluidPage( # Todo, consider navbarPage with a bootstrap theme.
     tabsetPanel
     (
         type='tabs',id='tabs'
-        ,DocTabUI()
-        ,MP1TabUI()
-        ,RD2TabUI()
+        ,Doc99TabUI()
+        ,Map2TabUI()
+        ,Marker1TabUI()
         ) # tabsetPanel
 ) # fluidPage
 
@@ -208,8 +232,8 @@ server = function(input, output, session){
         }
     ) # observeEvent(tabs)
 
-    MP1TabServer(input,output,session)
-    RD2TabServer(input,output,session)
+    Map2TabServer(input,output,session)
+    Marker1TabServer(input,output,session)
 } # server
 
 shinyApp(ui, server)
