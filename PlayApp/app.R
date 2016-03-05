@@ -134,17 +134,28 @@ MarkerChoices = data.frame(stringsAsFactors=F
 Doc99TabUI = function(){
     tabPanel(
         'Documentation',value='Doc'
-        ,titlePanel('Doc')
-        ,h3('Application Documentation and Background')
+        ,h3('Application Background')
         ,br()
-        ,'This application '
+        ,'This application was created to give me exposure to Leaflet. To make the resulting'
+        ,'data product meaningful, and to pay homage to all that make local government data'
+        ,'open for all to use, I used survey and tax data from Richmond, VA.'
+        ,br(),br()
+        ,h3('Usage')
+        ,br()
+        ,'Use the controls on the next tab to choose surveys and survey questions to map.'
+        ,br()
+        ,'Use the dropdown on the "Choose Map" tab to select the map style that works'
+        ,'best for you.'
+        ,br()
+        ,'Use the "Choose Marker" tab to select the marker style (and color) that works'
+        ,'best for you.'
         ,br(),br()
     ) # tabPanel - Documentation
 } # Doc99TabUI
 
 Map2TabUI = function(){
     tabPanel(
-        'Choose Map Source',value='Map2'
+        'Choose Map',value='Map2'
         ,mainPanel(
             leafletOutput('mymap2',width=800,height=800)
         )
@@ -174,7 +185,7 @@ Marker1TabUI = function()
     names(ChoiceList) = MarkerChoices$Choice
 
     tabPanel(
-        'Choose Marker Style',value='Marker1'
+        'Choose Marker',value='Marker1'
         ,mainPanel(
             leafletOutput('mymap1',width=800,height=800)
         )
