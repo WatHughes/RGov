@@ -135,20 +135,29 @@ Doc99TabUI = function(){
     tabPanel(
         'Documentation',value='Doc'
         ,h3('Application Background')
-        ,br()
         ,'This application was created to give me exposure to Leaflet. To make the resulting'
-        ,'data product meaningful, and to pay homage to all that make local government data'
-        ,'open for all to use, I used survey and tax data from Richmond, VA.'
+        ,'data product meaningful, and to pay homage to those that toil to make local government data'
+        ,'open for all to use, this application explores survey and tax data from Richmond, VA.'
+        ,'See the ReadMe on GitHub (link below) for download URLs.'
         ,br(),br()
         ,h3('Usage')
-        ,br()
         ,'Use the controls on the next tab to choose surveys and survey questions to map.'
-        ,br()
+        ,br(),br()
         ,'Use the dropdown on the "Choose Map" tab to select the map style that works'
         ,'best for you.'
-        ,br()
+        ,br(),br()
         ,'Use the "Choose Marker" tab to select the marker style (and color) that works'
         ,'best for you.'
+        ,br(),br()
+        ,h3('Source Code')
+        ,'The latest is always on ',a('GitHub',href='https://github.com/WatHughes/RGov'),'.'
+        ,br(),br()
+        ,h3('Copyright')
+        ,'Copyright 2016 Wat Hughes'
+        ,br()
+        ,'MIT License - see the ReadMe on GitHub for details.'
+        ,br()
+        ,'The maps are licensed by the providers. See each provider for details.'
         ,br(),br()
     ) # tabPanel - Documentation
 } # Doc99TabUI
@@ -196,6 +205,16 @@ Marker1TabUI = function()
     ) # tabPanel - Marker1
 } # Marker1TabUI
 
+addSelectedMarkers = function(map, data, input){
+    SelectedMarker = as.integer(input$MapM1)
+    MarkerType = MarkerChoices$Type[SelectedMarker]
+    if (MarkerType == 'I'){
+        addMarkers(map=map,data=data)
+    } else if (MarkerType == 'C'){
+        addCircleMarkers(map=map,data=data,color=MarkerChoices$Color[SelectedMarker])
+    }
+} # addSelectedMarkers
+
 Marker1TabServer = function(input, output, session){
     points1 = eventReactive(
         input$NP1
@@ -211,7 +230,7 @@ Marker1TabServer = function(input, output, session){
                 input$MapC2
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
-                addMarkers(data=points1())
+                addSelectedMarkers(data=points1(),input=input)
     })
 } # Marker1TabServer
 
