@@ -46,3 +46,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ## Map Copyrights
 
 In addition to the above copyright for this software, each of the map sources is protected by its own copyright. See the individual map providers for more information.
+
+## Try It!
+
+Temporary URL for WIP: https://wathughes.shinyapps.io/PlayApp/
