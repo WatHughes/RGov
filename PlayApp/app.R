@@ -117,10 +117,24 @@ MapProviders = c(
 ) # MapProviders
 
 MarkerChoices = data.frame(stringsAsFactors=F
-    ,Choice=c('Default Icon','Green Circles','Dark Orchid 3 Circles','Sienna 2 Circles')
+    ,Choice=c('Default Icon','Green Circles','Blue Circles','White Circles')
+#    ,Choice=c('Default Icon','Green Circles','Blue Circles','White Circles') # <sigh> most colors don't work; they show up as black/gray
     ,Type=c('I','C','C','C')
-    ,Color=c('','green','darkorchid3','sienna2')
+    ,Color=c('','green','blue','white')
 ) # MarkerChoices
+
+addSelectedMarkers = function(map, data, input){
+    SelectedMarker = as.integer(input$MapM1)
+    MarkerType = MarkerChoices$Type[SelectedMarker]
+    if (MarkerType == 'I'){
+        addMarkers(map=map,data=data)
+    } else if (MarkerType == 'C'){
+        addCircleMarkers(map=map
+                         ,data=data
+                         ,color=MarkerChoices$Color[SelectedMarker]
+                )
+    }
+} # addSelectedMarkers
 
 # To make it easy to add tabs, remove tabs, and maintain tabs, the code implements each tab's
 # portion of ui and server in its own functions. By convention, the function names
@@ -181,7 +195,7 @@ Map2TabServer = function(input, output, session){
                 input$MapC2
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
-                addMarkers(DataCenterLong,DataCenterLat)
+                addSelectedMarkers(data=cbind(DataCenterLong,DataCenterLat),input=input)
     })
 } # Map2TabServer
 
@@ -204,16 +218,6 @@ Marker1TabUI = function()
         )
     ) # tabPanel - Marker1
 } # Marker1TabUI
-
-addSelectedMarkers = function(map, data, input){
-    SelectedMarker = as.integer(input$MapM1)
-    MarkerType = MarkerChoices$Type[SelectedMarker]
-    if (MarkerType == 'I'){
-        addMarkers(map=map,data=data)
-    } else if (MarkerType == 'C'){
-        addCircleMarkers(map=map,data=data,color=MarkerChoices$Color[SelectedMarker])
-    }
-} # addSelectedMarkers
 
 Marker1TabServer = function(input, output, session){
     points1 = eventReactive(
