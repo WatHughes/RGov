@@ -4,12 +4,15 @@ require(leaflet)
 NumPoints = 1000
 DataCenterLat = 37.5287955
 DataCenterLong = -77.493477
+DefaultMapProvider = 'MapQuestOpen.OSM'
+SelectedMapProvider <<- DefaultMapProvider
+GroupName = 'Markers'
+DefaultMarkerStyle = 'Default Icon'
+DefaultMarkerStyle = '3'
+SelectedMarkerStyle <<- DefaultMarkerStyle
 
-# rColors = rgb(t(col2rgb(colors()) / 255))
-# names(r_colors) <- colors()
-
-# This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js
-# Forked from https://github.com/leaflet-extras/leaflet-providers, which was also copied here.
+# This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js which was
+# forked from https://github.com/leaflet-extras/leaflet-providers
 
 MapProviders = c(
     'OpenStreetMap.Mapnik'
@@ -124,15 +127,16 @@ MarkerChoices = data.frame(stringsAsFactors=F
 ) # MarkerChoices
 
 addSelectedMarkers = function(map, data, input){
-    SelectedMarker = as.integer(input$MapM1)
+    SelectedMarker = as.integer(SelectedMarkerStyle)
     MarkerType = MarkerChoices$Type[SelectedMarker]
     if (MarkerType == 'I'){
-        addMarkers(map=map,data=data)
+        addMarkers(map=map,data=data,group=GroupName)
     } else if (MarkerType == 'C'){
         addCircleMarkers(map=map
                          ,data=data
                          ,color=MarkerChoices$Color[SelectedMarker]
-                )
+                         ,group=GroupName
+        )
     }
 } # addSelectedMarkers
 
@@ -183,19 +187,41 @@ Map2TabUI = function(){
             leafletOutput('mymap2',width=800,height=800)
         )
         ,sidebarPanel(
-            selectInput('MapC2','Choose a map source:',choices=MapProviders, selected='MapQuestOpen.OSM')
+            selectInput('MapC2','Choose a map source:',choices=MapProviders, selected=DefaultMapProvider)
         )
     ) # tabPanel - Map Play 1
 } # Map2TabUI
+
+addMap2Markers = function(map,input){
+    addSelectedMarkers(map=map,data=cbind(DataCenterLong,DataCenterLat),input=input)
+} # addMap2Markers
 
 Map2TabServer = function(input, output, session){
     output$mymap2 = renderLeaflet({
         leaflet() %>%
             addProviderTiles(
-                input$MapC2
+                SelectedMapProvider
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
-                addSelectedMarkers(data=cbind(DataCenterLong,DataCenterLat),input=input)
+                addMap2Markers(input=input)
+    })
+
+    observeEvent(input$MapC2,{
+        SelectedMapProvider <<- input$MapC2
+        # Change this map.
+        leafletProxy('mymap2',session) %>%
+            clearTiles() %>%
+            addProviderTiles(
+                SelectedMapProvider
+                ,options=providerTileOptions(noWrap=T)
+            )
+        # And all the rest
+        leafletProxy('mymap1',session) %>%
+            clearTiles() %>%
+            addProviderTiles(
+                SelectedMapProvider
+                ,options=providerTileOptions(noWrap=T)
+            )
     })
 } # Map2TabServer
 
@@ -213,28 +239,46 @@ Marker1TabUI = function()
             leafletOutput('mymap1',width=800,height=800)
         )
         ,sidebarPanel(
-            selectInput('MapM1', 'Choose a map marker style:', choices = ChoiceList, selected=1)
+            selectInput('MapM1', 'Choose a map marker style:', choices = ChoiceList, selected=DefaultMarkerStyle)
             ,actionButton('NP1', 'New points')
         )
     ) # tabPanel - Marker1
 } # Marker1TabUI
 
-Marker1TabServer = function(input, output, session){
-    points1 = eventReactive(
-        input$NP1
-        ,{
-            cbind(rnorm(NumPoints) / 10 + DataCenterLong, rnorm(NumPoints) / 20 + DataCenterLat)
-        }
-        ,ignoreNULL=F
-    )
+GetRandomPoints = function(new=F){
+    if ((new == T) | !exists('CachedPoints')) {
+        CachedPoints <<- cbind(rnorm(NumPoints) / 10 + DataCenterLong, rnorm(NumPoints) / 20 + DataCenterLat)
+    }
+    CachedPoints
+} # GetRandomPoints
 
+Marker1TabServer = function(input, output, session){
     output$mymap1 = renderLeaflet({
         leaflet() %>%
             addProviderTiles(
-                input$MapC2
+                SelectedMapProvider
                 ,options=providerTileOptions(noWrap=T)
             ) %>%
-                addSelectedMarkers(data=points1(),input=input)
+                addSelectedMarkers(data=GetRandomPoints(T),input=input)
+    })
+
+    observeEvent(input$MapM1,{
+        SelectedMarkerStyle <<- input$MapM1
+        # Change this map.
+        leafletProxy('mymap1',session) %>%
+            clearGroup(GroupName) %>%
+                addSelectedMarkers(data=GetRandomPoints(),input=input)
+        # And all the rest
+        leafletProxy('mymap2',session) %>%
+            clearGroup(GroupName) %>%
+                addMap2Markers(input=input)
+    })
+
+    observeEvent(input$NP1,{ # New Points button
+        # Change just this map for this action
+        leafletProxy('mymap1',session) %>%
+            clearGroup(GroupName) %>%
+                addSelectedMarkers(data=GetRandomPoints(T),input=input)
     })
 } # Marker1TabServer
 
