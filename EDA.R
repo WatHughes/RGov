@@ -241,3 +241,24 @@ L2$setTemplate(afterScript = sprintf('
 L2
 #
 save(J2012,file='J2012.rda')
+
+SatisfactionColumn2012 = logical(ncol(Survey2012))
+for(i in 1:ncol(Survey2012)){
+    SatisfactionColumn2012[i] = is.numeric(unlist(Survey2012[,i,with=F]))
+    if (SatisfactionColumn2012[i]){
+        if (max(Survey2012[,i,with=F],na.rm=T) > 9){
+            SatisfactionColumn2012[i] = F
+        }
+        if (min(Survey2012[,i,with=F],na.rm=T) < 1){
+            SatisfactionColumn2012[i] = F
+        }
+    }
+    if (SatisfactionColumn2012[i]){
+        rows = (Survey2012[,i,with=F] == 9)
+        Survey2012[rows,i,with=F] = NA
+    }
+}
+rowMeans(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
+max(Survey2012[,which(Numeric2012),with=F],na.rm=T)
+
+

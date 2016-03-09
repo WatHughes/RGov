@@ -1,5 +1,6 @@
 require(shiny)
 require(leaflet)
+require(data.table)
 
 NumPoints = 1000
 DataCenterLat = 37.5287955
