@@ -112,7 +112,7 @@ InCommon
 # 190:  q33 how many years lived in richmond                   q28 describe your race FALSE
 # 191:           q34 annual household income                                  q28 2nd FALSE
 # 192:                            q35 gender                                  q28 3rd FALSE
-# 193:                            location 1                                  q28 4th FALSE
+# 193:                            Location 1                                  q28 4th FALSE
 # That isn't useful. So match on the first token. Note I could match more by matching the first
 # 2 tokens but many of those matches are not meaningful, e.g., 2nd choice, 3rd choice, etc. don't
 # necessarily match even if the QIDs match. So, match on unique first tokens. Must samecase to
@@ -146,27 +146,27 @@ QuestionNames$Survey2014 = substr(QuestionNames$Survey2014
                                   ,99999)
 
 # Mapping
-min(Survey2012$`location 1`[Survey2012$`location 1`!=''])
-max(Survey2012$`location 1`)
-min(Survey2014$`location 1`[Survey2014$`location 1`!=''&Survey2014$`location 1`!='(0, 0)'])
-max(Survey2014$`location 1`)
-Survey2012[`location 1`==''] # 5 of these
-Survey2014[`location 1`==''|`location 1`=='(0, 0)'] # 4 and 7 of each, respectively
+min(Survey2012$`Location 1`[Survey2012$`Location 1`!=''])
+max(Survey2012$`Location 1`)
+min(Survey2014$`Location 1`[Survey2014$`Location 1`!=''&Survey2014$`Location 1`!='(0, 0)'])
+max(Survey2014$`Location 1`)
+Survey2012[`Location 1`==''] # 5 of these
+Survey2014[`Location 1`==''|`Location 1`=='(0, 0)'] # 4 and 7 of each, respectively
 
-invisible(Survey2012[,Lat:=as.numeric(sapply(regmatches(Survey2012$`location 1`,
-                                                        regexec('[+-]?[0-9]+',Survey2012$`location 1`))
+invisible(Survey2012[,Lat:=as.numeric(sapply(regmatches(Survey2012$`Location 1`,
+                                                        regexec('[+-]?[0-9]+',Survey2012$`Location 1`))
        ,function(x) if(length(x)==0) '0' else x))/1000000])
 boxplot(Survey2012[Lat!=0,Lat])
-invisible(Survey2014[,Lat:=as.numeric(sapply(regmatches(Survey2014$`location 1`,
-                                                        regexec('[+-]?[0-9]+\\.[0-9]+',Survey2014$`location 1`))
+invisible(Survey2014[,Lat:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
+                                                        regexec('[+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
        ,function(x) if(length(x)==0) '0' else x))])
 boxplot(list(Lat2012=Survey2012[Lat!=0,Lat],Lat2014=Survey2014[Lat!=0,Lat]))
-invisible(Survey2012[,Long:=as.numeric(sapply(regmatches(Survey2012$`location 1`,
-                                                        regexec(' [+-]?[0-9]+',Survey2012$`location 1`))
+invisible(Survey2012[,Long:=as.numeric(sapply(regmatches(Survey2012$`Location 1`,
+                                                        regexec(' [+-]?[0-9]+',Survey2012$`Location 1`))
        ,function(x) if(length(x)==0) '0' else x))/1000000])
 boxplot(Survey2012[Long!=0,Long])
-invisible(Survey2014[,Long:=as.numeric(sapply(regmatches(Survey2014$`location 1`,
-                                                        regexec(' [+-]?[0-9]+\\.[0-9]+',Survey2014$`location 1`))
+invisible(Survey2014[,Long:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
+                                                        regexec(' [+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
        ,function(x) if(length(x)==0) '0' else x))])
 boxplot(list(Long2012=Survey2012[Long!=0,Long],Long2014=Survey2014[Long!=0,Long]))
 
@@ -254,11 +254,24 @@ for(i in 1:ncol(Survey2012)){
         }
     }
     if (SatisfactionColumn2012[i]){
-        rows = (Survey2012[,i,with=F] == 9)
-        Survey2012[rows,i,with=F] = NA
+        rows = which(Survey2012[,i,with=F] == 9)
+        Survey2012[rows,i] = NA
     }
 }
-rowMeans(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
-max(Survey2012[,which(Numeric2012),with=F],na.rm=T)
-
-
+table(SatisfactionColumn2012)
+# FALSE  TRUE
+#    45   148
+Survey2012[,OverallSatisfaction:=rowMeans(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)]
+# max(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
+# min(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
+Survey2012 = Survey2012[Long != 0 & Lat != 0]
+dim(Survey2012) # Before above [1] 1371  196 after [1] 1366  196
+table(Survey2012$OverallSatisfaction)
+Survey2012[,mean(Long)] # -77.46636
+Survey2012[,mean(Lat)] # 37.53813
+hist(Survey2012$OverallSatisfaction,breaks=3)
+Survey2012[,SatisfactionLevelGroup:=as.numeric(cut(OverallSatisfaction,3))]
+table(Survey2012$SatisfactionLevelGroup)
+#    1    2    3
+#   77 1003  286
+save(Survey2012,file='Survey2012.rda')

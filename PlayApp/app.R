@@ -3,14 +3,22 @@ require(leaflet)
 require(data.table)
 
 NumPoints = 1000
-DataCenterLat = 37.5287955
-DataCenterLong = -77.493477
+# Original value based on range DataCenterLat = 37.5287955
+# DataCenterLong = -77.493477
+DataCenterLat = 37.53813
+DataCenterLong = -77.46636
 DefaultMapProvider = 'MapQuestOpen.OSM'
 SelectedMapProvider <<- DefaultMapProvider
 GroupName = 'Markers'
 DefaultMarkerStyle = 'Default Icon'
 DefaultMarkerStyle = '3'
 SelectedMarkerStyle <<- DefaultMarkerStyle
+
+ColorMap = c(
+    'red'
+    ,'yellow'
+    ,'green'
+) # ColorMap
 
 # This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js which was
 # forked from https://github.com/leaflet-extras/leaflet-providers
@@ -127,16 +135,18 @@ MarkerChoices = data.frame(stringsAsFactors=F
     ,Color=c('','green','blue','white')
 ) # MarkerChoices
 
-addSelectedMarkers = function(map, data, input){
+addSelectedMarkers = function(map,data,input,popup=NULL){
     SelectedMarker = as.integer(SelectedMarkerStyle)
     MarkerType = MarkerChoices$Type[SelectedMarker]
     if (MarkerType == 'I'){
-        addMarkers(map=map,data=data,group=GroupName)
+        addMarkers(map=map,data=data,group=GroupName,popup=popup)
     } else if (MarkerType == 'C'){
         addCircleMarkers(map=map
                          ,data=data
-                         ,color=MarkerChoices$Color[SelectedMarker]
+#                         ,color=MarkerChoices$Color[SelectedMarker]
+                         ,color=ColorMap[Survey2012$SatisfactionLevelGroup]
                          ,group=GroupName
+                         ,popup=popup
         )
     }
 } # addSelectedMarkers
@@ -181,6 +191,37 @@ Doc99TabUI = function(){
     ) # tabPanel - Documentation
 } # Doc99TabUI
 
+Data3TabUI = function(){
+    tabPanel(
+        'Choose Data',value='Data3'
+        ,mainPanel(
+            leafletOutput('mymap3',width=800,height=800)
+        )
+        ,sidebarPanel(
+            selectInput('DataC3','Choose a map source:',choices=MapProviders, selected=DefaultMapProvider)
+        )
+    ) # tabPanel
+} # Data3TabUI
+
+addData3Markers = function(map,input){
+    addSelectedMarkers(map=map
+                       ,data=cbind(Survey2012$Long,Survey2012$Lat)
+                       ,input=input
+                       ,popup=as.character(round(Survey2012$OverallSatisfaction,2))
+                       )
+} # addData3Markers
+
+Data3TabServer = function(input, output, session){
+    output$mymap3 = renderLeaflet({
+        leaflet() %>%
+            addProviderTiles(
+                SelectedMapProvider
+                ,options=providerTileOptions(noWrap=T)
+            ) %>%
+                addData3Markers(input=input)
+    })
+} # Data3TabServer
+
 Map2TabUI = function(){
     tabPanel(
         'Choose Map',value='Map2'
@@ -190,7 +231,7 @@ Map2TabUI = function(){
         ,sidebarPanel(
             selectInput('MapC2','Choose a map source:',choices=MapProviders, selected=DefaultMapProvider)
         )
-    ) # tabPanel - Map Play 1
+    ) # tabPanel
 } # Map2TabUI
 
 addMap2Markers = function(map,input){
@@ -218,6 +259,12 @@ Map2TabServer = function(input, output, session){
             )
         # And all the rest
         leafletProxy('mymap1',session) %>%
+            clearTiles() %>%
+            addProviderTiles(
+                SelectedMapProvider
+                ,options=providerTileOptions(noWrap=T)
+            )
+        leafletProxy('mymap3',session) %>%
             clearTiles() %>%
             addProviderTiles(
                 SelectedMapProvider
@@ -273,6 +320,9 @@ Marker1TabServer = function(input, output, session){
         leafletProxy('mymap2',session) %>%
             clearGroup(GroupName) %>%
                 addMap2Markers(input=input)
+        leafletProxy('mymap3',session) %>%
+            clearGroup(GroupName) %>%
+                addData3Markers(input=input)
     })
 
     observeEvent(input$NP1,{ # New Points button
@@ -288,6 +338,7 @@ ui = fluidPage( # Todo, consider navbarPage with a bootstrap theme.
     (
         type='tabs',id='tabs'
         ,Doc99TabUI()
+        ,Data3TabUI()
         ,Map2TabUI()
         ,Marker1TabUI()
         ) # tabsetPanel
@@ -302,15 +353,10 @@ server = function(input, output, session){
             if (CurrentTab == 'Doc')
             {
             }
-            if (CurrentTab == 'Random1')
-            {
-            }
-            if (CurrentTab == 'Random2')
-            {
-            }
         }
     ) # observeEvent(tabs)
 
+    Data3TabServer(input,output,session)
     Map2TabServer(input,output,session)
     Marker1TabServer(input,output,session)
 } # server
