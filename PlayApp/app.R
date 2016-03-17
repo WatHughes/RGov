@@ -182,6 +182,10 @@ Doc99TabUI = function(){
         ,h3('Usage')
         ,'Use the controls on the next tab to choose surveys and survey questions to map.'
         ,br(),br()
+        ,'Use the dropdown on the "Choose Data" to load the selected satisfaction scores and'
+        ,'matching collection locations. Click a marker to see the average score over all survey'
+        ,'questions for that location.'
+        ,br(),br()
         ,'Use the dropdown on the "Choose Map" tab to select the map style that works'
         ,'best for you.'
         ,br(),br()
