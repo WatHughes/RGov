@@ -7,19 +7,18 @@ NumPoints = 1000
 # DataCenterLong = -77.493477
 DataCenterLat = 37.53813
 DataCenterLong = -77.46636
+DefaultDataset = '2012 Satisfaction Survey'
+SelectedDataset = DefaultDataset
 DefaultMapProvider = 'MapQuestOpen.OSM'
 SelectedMapProvider <<- DefaultMapProvider
 GroupName = 'Markers'
 DefaultMarkerStyle = 'Default Icon'
-DefaultMarkerStyle = '3'
+DefaultMarkerStyle = '2'
 SelectedMarkerStyle <<- DefaultMarkerStyle
 
-ColorMap = c(
-    'red'
-    ,'yellow'
-    ,'green'
-) # ColorMap
-
+Datasets = c(
+    '2012 Satisfaction Survey'
+) # Datasets
 # This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js which was
 # forked from https://github.com/leaflet-extras/leaflet-providers
 
@@ -128,12 +127,20 @@ MapProviders = c(
 #    ,'NLS' # Appears blank
 ) # MapProviders
 
+ColorMap = c( # For Stoplight
+    'red'
+    ,'yellow'
+    ,'green'
+) # ColorMap
+
 MarkerChoices = data.frame(stringsAsFactors=F
-    ,Choice=c('Default Icon','Green Circles','Blue Circles','White Circles')
+    ,Choice=c('Default Icon','Stoplight Circles','Green Circles','Blue Circles','White Circles')
 #    ,Choice=c('Default Icon','Green Circles','Blue Circles','White Circles') # <sigh> most colors don't work; they show up as black/gray
-    ,Type=c('I','C','C','C')
-    ,Color=c('','green','blue','white')
+    ,Type=c('I','C','C','C','C')
+    ,Color=c('','SL','green','blue','white')
 ) # MarkerChoices
+
+load('Survey2012.rda')
 
 addSelectedMarkers = function(map,data,input,popup=NULL){
     SelectedMarker = as.integer(SelectedMarkerStyle)
@@ -141,10 +148,13 @@ addSelectedMarkers = function(map,data,input,popup=NULL){
     if (MarkerType == 'I'){
         addMarkers(map=map,data=data,group=GroupName,popup=popup)
     } else if (MarkerType == 'C'){
+        ColorName=MarkerChoices$Color[SelectedMarker]
+        if (ColorName == 'SL'){ # Stoplight
+            ColorName = ColorMap[Survey2012$SatisfactionLevelGroup]
+        }
         addCircleMarkers(map=map
                          ,data=data
-#                         ,color=MarkerChoices$Color[SelectedMarker]
-                         ,color=ColorMap[Survey2012$SatisfactionLevelGroup]
+                         ,color=ColorName
                          ,group=GroupName
                          ,popup=popup
         )
@@ -198,7 +208,7 @@ Data3TabUI = function(){
             leafletOutput('mymap3',width=800,height=800)
         )
         ,sidebarPanel(
-            selectInput('DataC3','Choose a map source:',choices=MapProviders, selected=DefaultMapProvider)
+            selectInput('DataC3','Choose a dataset:',choices=Datasets, selected=DefaultDataset)
         )
     ) # tabPanel
 } # Data3TabUI
