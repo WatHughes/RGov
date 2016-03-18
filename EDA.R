@@ -2,9 +2,9 @@ require(data.table)
 # install.packages('rMaps')
 # require(devtools)
 # install_github('ramnathv/rCharts@dev')
-require(rCharts)
+# require(rCharts)
 # install_github('ramnathv/rMaps')
-require(rMaps)
+# require(rMaps)
 # install.packages('leaflet')
 
 DataDir = '../Data/RGov'
@@ -260,7 +260,7 @@ for(i in 1:ncol(Survey2012)){
 }
 table(SatisfactionColumn2012)
 # FALSE  TRUE
-#    45   148
+#    45   148 # hmmmm or 47 and 148??
 Survey2012[,OverallSatisfaction:=rowMeans(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)]
 # max(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
 # min(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
@@ -275,3 +275,59 @@ table(Survey2012$SatisfactionLevelGroup)
 #    1    2    3
 #   77 1003  286
 save(Survey2012,file='Survey2012.rda')
+# load('PlayApp/Survey2012.rda')
+
+
+# Clean it up and summarize 2014
+
+require(data.table)
+DataDir = '../Data/RGov'
+
+Survey2014 = fread(paste0(DataDir,'/','RVA_Community_Survey_2014_Data_GEO.csv'))
+
+invisible(Survey2014[,Lat:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
+                                                        regexec('[+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
+       ,function(x) if(length(x)==0) '0' else x))])
+invisible(Survey2014[,Long:=as.numeric(sapply(regmatches(Survey2014$`Location 1`,
+                                                        regexec(' [+-]?[0-9]+\\.[0-9]+',Survey2014$`Location 1`))
+       ,function(x) if(length(x)==0) '0' else x))])
+
+
+SatisfactionColumn2014 = logical(ncol(Survey2014))
+for(i in 1:ncol(Survey2014)){
+    SatisfactionColumn2014[i] = is.numeric(unlist(Survey2014[,i,with=F]))
+    if (SatisfactionColumn2014[i]){
+        if (max(Survey2014[,i,with=F],na.rm=T) > 9){
+            SatisfactionColumn2014[i] = F
+        }
+        if (min(Survey2014[,i,with=F],na.rm=T) < 1){
+            SatisfactionColumn2014[i] = F
+        }
+        if (names(Survey2014)[i] == 'District'){
+            SatisfactionColumn2014[i] = F
+        }
+    }
+    if (SatisfactionColumn2014[i]){
+        rows = which(Survey2014[,i,with=F] == 9)
+        Survey2014[rows,i] = NA
+    }
+}
+table(SatisfactionColumn2014)
+# FALSE  TRUE
+#    54   158
+Survey2014[,OverallSatisfaction:=rowMeans(Survey2014[,which(SatisfactionColumn2014),with=F],na.rm=T)]
+# max(Survey2014[,which(SatisfactionColumn2014),with=F],na.rm=T)
+# min(Survey2014[,which(SatisfactionColumn2014),with=F],na.rm=T)
+Survey2014 = Survey2014[Long != 0 & Lat != 0]
+dim(Survey2014) # Before above xyzzy after [1] 1407  213
+table(Survey2014$OverallSatisfaction)
+Survey2014[,mean(Long)] # -77.46732
+Survey2014[,mean(Lat)] # 37.53816
+hist(Survey2014$OverallSatisfaction,breaks=3)
+Survey2014[,SatisfactionLevelGroup:=as.numeric(cut(OverallSatisfaction,3))]
+table(Survey2014$SatisfactionLevelGroup)
+#    1    2    3
+#   98 1059  250
+save(Survey2014,file='PlayApp/Survey2014.rda')
+# load('PlayApp/Survey2014.rda')
+

@@ -7,7 +7,7 @@ NumPoints = 1000
 # DataCenterLong = -77.493477
 DataCenterLat = 37.53813
 DataCenterLong = -77.46636
-DefaultDataset = '2012 Satisfaction Survey'
+DefaultDataset = '2014 Satisfaction Survey'
 SelectedDataset = DefaultDataset
 DefaultMapProvider = 'MapQuestOpen.OSM'
 SelectedMapProvider <<- DefaultMapProvider
@@ -17,7 +17,7 @@ DefaultMarkerStyle = '2'
 SelectedMarkerStyle <<- DefaultMarkerStyle
 
 Datasets = c(
-    '2012 Satisfaction Survey'
+    '2014 Satisfaction Survey'
 ) # Datasets
 # This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js which was
 # forked from https://github.com/leaflet-extras/leaflet-providers
@@ -119,7 +119,7 @@ MapProviders = c(
  #   ,'BasemapAT.orthofoto' # Appears blank
     ,'NASAGIBS.ModisTerraTrueColorCR'
     ,'NASAGIBS.ModisTerraBands367CR'
-#    ,'NASAGIBS.ViirsEarthAtNight2012' # Appears blank
+#    ,'NASAGIBS.ViirsEarthAtNight2014' # Appears blank
 #    ,'NASAGIBS.ModisTerraLSTDay' # Appears blank
 #    ,'NASAGIBS.ModisTerraSnowCover' # Appears useless
 #    ,'NASAGIBS.ModisTerraAOD' # Appears blank
@@ -140,7 +140,8 @@ MarkerChoices = data.frame(stringsAsFactors=F
     ,Color=c('','SL','green','blue','white')
 ) # MarkerChoices
 
-load('Survey2012.rda')
+load('Survey2014.rda')
+load('Survey2014.rda')
 
 addSelectedMarkers = function(map,data,input,popup=NULL){
     SelectedMarker = as.integer(SelectedMarkerStyle)
@@ -150,7 +151,7 @@ addSelectedMarkers = function(map,data,input,popup=NULL){
     } else if (MarkerType == 'C'){
         ColorName=MarkerChoices$Color[SelectedMarker]
         if (ColorName == 'SL'){ # Stoplight
-            ColorName = ColorMap[Survey2012$SatisfactionLevelGroup]
+            ColorName = ColorMap[Survey2014$SatisfactionLevelGroup]
         }
         addCircleMarkers(map=map
                          ,data=data
@@ -219,9 +220,9 @@ Data3TabUI = function(){
 
 addData3Markers = function(map,input){
     addSelectedMarkers(map=map
-                       ,data=cbind(Survey2012$Long,Survey2012$Lat)
+                       ,data=cbind(Survey2014$Long,Survey2014$Lat)
                        ,input=input
-                       ,popup=as.character(round(Survey2012$OverallSatisfaction,2))
+                       ,popup=as.character(round(Survey2014$OverallSatisfaction,2))
                        )
 } # addData3Markers
 
