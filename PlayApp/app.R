@@ -19,6 +19,7 @@ SelectedMarkerStyle <<- DefaultMarkerStyle
 Datasets = c(
     '2012 Satisfaction Survey'
     ,'2014 Satisfaction Survey'
+    ,'Satisfaction Change From 2012 to 2014'
 ) # Datasets
 # This is from https://github.com/WatHughes/leaflet-providers/blob/gh-pages/leaflet-providers.js which was
 # forked from https://github.com/leaflet-extras/leaflet-providers
@@ -143,6 +144,7 @@ MarkerChoices = data.frame(stringsAsFactors=F
 
 load('Survey2012.rda')
 load('Survey2014.rda')
+load('SurveyJoin.rda')
 SurveyData = Survey2014
 
 addSelectedMarkers = function(map,data,input,popup=NULL){
@@ -224,7 +226,7 @@ addData3Markers = function(map,input){
     addSelectedMarkers(map=map
                        ,data=cbind(SurveyData$Long,SurveyData$Lat)
                        ,input=input
-                       ,popup=as.character(round(SurveyData$OverallSatisfaction,2))
+                       ,popup=as.character(round(SurveyData$MapValue,2))
                        )
 } # addData3Markers
 
@@ -241,8 +243,10 @@ Data3TabServer = function(input, output, session){
     observeEvent(input$DataC3,{
         if (input$DataC3 == '2012 Satisfaction Survey'){
             SurveyData <<- Survey2012
-        } else {
+        } else if (input$DataC3 == '2014 Satisfaction Survey'){
             SurveyData <<- Survey2014
+        } else {
+            SurveyData <<- SurveyJoin
         }
         leafletProxy('mymap3',session) %>%
             clearGroup(GroupName) %>%
