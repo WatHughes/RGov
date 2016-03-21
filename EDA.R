@@ -264,6 +264,7 @@ table(SatisfactionColumn2012)
 Survey2012[,OverallSatisfaction:=rowMeans(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)]
 # max(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
 # min(Survey2012[,which(SatisfactionColumn2012),with=F],na.rm=T)
+Survey2012[,MapValue:=OverallSatisfaction]
 Survey2012 = Survey2012[Long != 0 & Lat != 0]
 dim(Survey2012) # Before above [1] 1371  196 after [1] 1366  196
 table(Survey2012$OverallSatisfaction)
@@ -274,7 +275,7 @@ Survey2012[,SatisfactionLevelGroup:=as.numeric(cut(OverallSatisfaction,3))]
 table(Survey2012$SatisfactionLevelGroup)
 #    1    2    3
 #   77 1003  286
-save(Survey2012,file='Survey2012.rda')
+save(Survey2012,file='PlayApp/Survey2012.rda')
 # load('PlayApp/Survey2012.rda')
 
 
@@ -318,7 +319,8 @@ table(SatisfactionColumn2014)
 Survey2014[,OverallSatisfaction:=rowMeans(Survey2014[,which(SatisfactionColumn2014),with=F],na.rm=T)]
 # max(Survey2014[,which(SatisfactionColumn2014),with=F],na.rm=T)
 # min(Survey2014[,which(SatisfactionColumn2014),with=F],na.rm=T)
-Survey2014 = Survey2014[Long != 0 & Lat != 0]
+Survey2014[,MapValue:=OverallSatisfaction]
+Survey2014 = Survey2014[Long != 0 & Lat != 0] # Consider removing these before computing overall
 dim(Survey2014) # Before above xyzzy after [1] 1407  213
 table(Survey2014$OverallSatisfaction)
 Survey2014[,mean(Long)] # -77.46732
@@ -331,3 +333,36 @@ table(Survey2014$SatisfactionLevelGroup)
 save(Survey2014,file='PlayApp/Survey2014.rda')
 # load('PlayApp/Survey2014.rda')
 
+# Find the common GPS coordinates so we can display up/down markers.
+
+# head(Survey2012$`Location 1`)
+# head(Survey2014$`Location 1`)
+head(Survey2012$Lat)
+head(Survey2014$Lat)
+intersect(Survey2012$Lat,Survey2014$Lat)
+intersect(Survey2012$Long,Survey2014$Long)
+SurveyJoin = Survey2012[Survey2014,on=c(Lat='Lat',Long='Long'),nomatch=0]
+dim(SurveyJoin)
+# [1] 1410  409 # Default nomatch=NA
+# [1]  64 409 # Inner join: nomatch=0
+SurveyJoin[,SatisfactionDelta:=i.OverallSatisfaction-OverallSatisfaction]
+SurveyJoin[,MapValue:=SatisfactionDelta]
+# SurveyJoin$SatisfactionDelta
+#  [1]  0.049677419  0.056530612 -0.198347107 -0.046757364 -0.353460160  0.073066139 -0.005378721
+#  [8] -0.112203112 -0.392851664 -0.927175229  0.741715728 -0.175496285  0.592532468 -0.710851648
+# [15]  0.212962963  0.168470418 -0.392896628 -0.114234327 -0.031217956 -0.952109181 -0.688308362
+# [22] -0.480356525  0.371212121 -0.939519338  0.085576778  0.319987959  0.492349852  0.324739937
+# [29] -0.316187739 -0.218007663 -0.281191223 -0.181646655 -0.195676275 -0.057692308 -0.186415182
+# [36] -0.058302967 -0.637962963  0.272840374  0.610797828  0.451698211 -0.548817327 -0.021428571
+# [43] -0.347479675 -0.085555556  0.270414064  0.215326340  0.146436782 -0.074192262  0.397849462
+# [50] -0.135302198 -0.117926467 -0.167560664  0.096801790 -0.418780356 -0.256410256  0.007147265
+# [57] -0.082864039 -1.600740741 -0.057801418 -0.050557074 -0.407634471 -0.336770867 -1.020447671
+# [64] -0.263798701
+hist(SurveyJoin$SatisfactionDelta,10)
+# SurveyJoin[,SatisfactionLevelGroup:=as.numeric(cut(SurveyJoin$SatisfactionDelta,3))]
+SurveyJoin[,SatisfactionLevelGroup:=(ifelse(SatisfactionDelta<(-0.3),1,ifelse(SatisfactionDelta>0.3,3,2)))]
+table(SurveyJoin$SatisfactionLevelGroup)
+#  1  2  3
+# 18 37  9
+save(SurveyJoin,file='PlayApp/SurveyJoin.rda')
+# load('PlayApp/SurveyJoin.rda')
