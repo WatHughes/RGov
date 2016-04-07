@@ -156,6 +156,7 @@ addSelectedMarkers = function(map,data,input,popup=NULL){
         ColorName=MarkerChoices$Color[SelectedMarker]
         if (ColorName == 'SL'){ # Stoplight
             ColorName = ColorMap[SurveyData$SatisfactionLevelGroup]
+            addLegend(map,position='bottomright',colors=ColorMap,labels=c(-1,0,1),title='Legend')
         }
         addCircleMarkers(map=map
                          ,data=data
@@ -226,6 +227,10 @@ addData3Markers = function(map,input){
     addSelectedMarkers(map=map
                        ,data=cbind(SurveyData$Long,SurveyData$Lat)
                        ,input=input
+#                       ,popup=paste(as.character(round(SurveyData$MapValue,2))
+#                                  ,as.character(SurveyData$Lat)
+#                                  ,as.character(SurveyData$Long)
+#                       )
                        ,popup=as.character(round(SurveyData$MapValue,2))
                        )
 } # addData3Markers

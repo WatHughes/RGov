@@ -366,3 +366,19 @@ table(SurveyJoin$SatisfactionLevelGroup)
 # 18 37  9
 save(SurveyJoin,file='PlayApp/SurveyJoin.rda')
 # load('PlayApp/SurveyJoin.rda')
+
+
+# Experiment with fuzzy match on location by rounding off the lowest digit before joining
+
+Survey2012$LongJ = round(Survey2012$Long,5)
+head(Survey2012$Long - Survey2012$LongJ)
+Survey2012$LatJ = round(Survey2012$Lat,5)
+head(Survey2012$Lat - Survey2012$LatJ)
+Survey2014$LongJ = round(Survey2014$Long,5)
+head(Survey2014$Long - Survey2014$LongJ)
+Survey2014$LatJ = round(Survey2014$Lat,5)
+head(Survey2014$Lat - Survey2014$LatJ)
+
+SurveyJoin = Survey2012[Survey2014,on=c(LatJ='LatJ',LongJ='LongJ'),nomatch=0]
+dim(SurveyJoin)
+# [1]  67 415 # 3 more, yawn
