@@ -382,3 +382,6 @@ head(Survey2014$Lat - Survey2014$LatJ)
 SurveyJoin = Survey2012[Survey2014,on=c(LatJ='LatJ',LongJ='LongJ'),nomatch=0]
 dim(SurveyJoin)
 # [1]  67 415 # 3 more, yawn
+
+# next
+
